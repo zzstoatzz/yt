@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yt"
+authors = [
+    {name = "Nate Nowack", email = "nate@prefect.io"},
+]
+description = "a common set of utilities often used in shared projects"
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["pydantic", "llm", "prefect"]
+license = {text = "Choose a license (e.g., MIT, BSD-3-Clause, Apache-2.0)"}
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Choose a license (e.g., MIT License)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "gh-util",
+    "marvin",
+    "prefect",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = ["ruff", "uv", "pre-commit"]
+
+[project.scripts]
+# TODO
+
+[project.urls]
+"Homepage" = "https://github.com/zzstoatzz/yt"
+
+[tool.setuptools_scm]
+write_to = "src/yt/_version.py"
+
+[tool.ruff]
+target-version = "py311"
+lint.extend-select = ["I"]
+lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$" # default, but here in case we want to change it
+
+[tool.ruff.format]
+quote-style = "double"
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ['I', 'F401', 'E402']
+"conftest.py" = ["F401", "F403"]
+'tests/fixtures/*.py' = ['F403']

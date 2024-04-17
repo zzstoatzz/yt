@@ -8,6 +8,7 @@ from gh_util.functions import (
 )
 from gh_util.logging import get_logger
 from gh_util.types import GitHubIssue, GitHubLabel
+from jinja2 import Template
 from starlette.requests import Request
 
 app = FastAPI()
@@ -35,26 +36,32 @@ def write_a_comment(issue: GitHubIssue) -> str:
 
 
 @app.get("/")
-async def read_root():
+async def healthcheck():
     return {"Hello": "World"}
 
 
 def get_repo_issue_output(issue: GitHubIssue) -> str:
-    issue_output = "GitHub Issue\n"
-    issue_output += f"Created by {issue.user.login} on {issue.created_at:%A, %B %d, %Y %I:%M %p}\n\n"
-    issue_output += f"[{issue.number} {issue.title}]({issue.url})\n"
-    issue_output += f"Created by {issue.user.login} on {issue.created_at}\n\n"
-    issue_output += f"{issue.body}\n"
+    template = Template(
+        """
+        GitHub Issue
+        Created by {{ issue.user.login }} on {{ issue.created_at.strftime('%A, %B %d, %Y %I:%M %p') }}
 
-    for comment in getattr(issue, "user_comments", []):
-        comment_output = "\nComment\n"
-        comment_output += f"{comment.created_at:%A, %B %d, %Y %I:%M %p}\n\n"
-        comment_output += f"[{comment.user.login}]({comment.user.url}) said:\n\n"
-        comment_output += f"{comment.body}\n"
+        [{{ issue.number }} {{ issue.title }}]({{ issue.url }})
+        Created by {{ issue.user.login }} on {{ issue.created_at }}
 
-        issue_output += comment_output
+        {{ issue.body }}
+        {% for comment in issue.user_comments %}
+            Comment
+            {{ comment.created_at.strftime('%A, %B %d, %Y %I:%M %p') }}
 
-    return issue_output
+            [{{ comment.user.login }}]({{ comment.user.url }}) said:
+
+            {{ comment.body }}
+        {% endfor %}
+    """
+    )
+
+    return template.render(issue=issue)
 
 
 @app.post("/webhook")
