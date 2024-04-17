@@ -24,22 +24,14 @@ CMD [ "plugin.lambda_handler" ]
 - Create a new file named `lambda_function.py` (or any desired name) and write your Lambda function code.
 - Example Lambda function code:
 ```python
-import os
+from prefect import flow
 
+@flow(log_prints=True)
 def lambda_handler(event, context):
     """AWS Lambda function entrypoint"""
-    # Access environment variables
-    env_var1 = os.environ.get('ENV_VAR1')
-    env_var2 = os.environ.get('ENV_VAR2')
+    print(f"{event=}, {context=}")
 
-    # Use the environment variables in your Lambda function logic
-    print(f"ENV_VAR1: {env_var1}")
-    print(f"ENV_VAR2: {env_var2}")
-
-    return {
-        'statusCode': 200,
-        'body': 'Hello, World!'
-    }
+    return {"message": "Hello, World!"}
 ```
 
 ### Step 4: Build the Docker image
