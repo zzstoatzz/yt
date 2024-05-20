@@ -32,7 +32,7 @@ if __name__ == "__main__":
             initialize_network(settings.initial_clients, reset=True)
 
     ani = animation.FuncAnimation(
-        fig, animate, frames=settings.num_steps + 1, interval=settings.refresh_interval
+        fig, animate, frames=settings.num_steps, interval=settings.refresh_interval
     )
 
     plt.show()

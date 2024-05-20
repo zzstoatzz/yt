@@ -8,18 +8,20 @@ from variables import (
     LOCK,
     LOG_BUFFER,
     NETWORK,
-    ONLINE_CLIENTS,
     SERVERS,
-    update_event,
+    UPDATE_EVENT,
 )
 
 
 def add_client(client: str):
-    if client in ONLINE_CLIENTS:
+    if client in CLIENT_LIFETIMES:
         raise ValueError(f"{client} is already online")
 
     load_balancer = random.choice(LOAD_BALANCERS)
     with LOCK:
+        if len(CLIENT_LIFETIMES) >= len(SERVERS) * settings.max_connections:
+            LOG_BUFFER.append(f"{client} connection refused: network is full")
+            return
         NETWORK.add_node(client, type="client")
         NETWORK.add_edge(client, load_balancer)
         LOG_BUFFER.append(f"{client} connected to {load_balancer}")
@@ -31,8 +33,6 @@ def add_client(client: str):
                 )
             ),
         )
-        ONLINE_CLIENTS.add(client)
-        update_event.set()
 
     if available_servers := [
         server
@@ -43,11 +43,14 @@ def add_client(client: str):
         with LOCK:
             NETWORK.add_edge(load_balancer, server, client=client)
             LOG_BUFFER.append(f"{load_balancer} connected {client} to {server}")
+            SERVERS[server].append(client)
+
+    UPDATE_EVENT.set()
 
 
-def add_random_client():
-    if offline_clients := set(CLIENT_POOL) - ONLINE_CLIENTS:
-        add_client(random.choice(list(offline_clients)))
+def add_random_client():  # TODO: could be more creative
+    if offline_clients := list(set(CLIENT_POOL) - set(CLIENT_LIFETIMES.keys())):
+        add_client(random.choice(offline_clients))
 
 
 def initialize_network(num_clients: int, reset=False):
@@ -57,10 +60,10 @@ def initialize_network(num_clients: int, reset=False):
             NETWORK.add_nodes_from(SERVERS, type="server")
             NETWORK.add_nodes_from(LOAD_BALANCERS, type="load_balancer")
             CLIENT_LIFETIMES.clear()
-            ONLINE_CLIENTS.clear()
             LOG_BUFFER.clear()
+            [server_cnxs.clear() for server_cnxs in SERVERS.values()]
     for i in range(num_clients):
-        add_client(f"Client_{len(ONLINE_CLIENTS):02d}")
+        add_random_client()
 
 
 def update_client_lifetimes():
@@ -87,7 +90,7 @@ def update_client_lifetimes():
                 )
             NETWORK.remove_node(client)
             del CLIENT_LIFETIMES[client]
-            ONLINE_CLIENTS.remove(client)
+            # del SERVERS[server][SERVERS[server].index(client)]
             LOG_BUFFER.append(f"{client} disconnected from {load_balancer}")
     if clients_to_remove:
-        update_event.set()
+        UPDATE_EVENT.set()

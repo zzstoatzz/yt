@@ -13,9 +13,8 @@ from variables import (
     LOCK,
     LOG_BUFFER,
     NETWORK,
-    ONLINE_CLIENTS,
     SERVERS,
-    update_event,
+    UPDATE_EVENT,
 )
 
 
@@ -26,9 +25,9 @@ def get_colors(status: dict[str, int], cmap_name: str = "viridis") -> dict[str, 
     return {node: cmap(norm(count)) for node, count in status.items()}
 
 
-def get_server_status() -> dict[str, bool]:
+def get_server_status() -> dict[str, int]:
     with LOCK:
-        return {server: NETWORK.degree(server) > 0 for server in SERVERS}
+        return {server: len(SERVERS[server]) for server in SERVERS}
 
 
 def get_load_balancer_status() -> dict[str, int]:
@@ -69,11 +68,11 @@ def create_layout() -> Layout:
 
 
 def update_header() -> Panel:
-    current_clients = len(ONLINE_CLIENTS)
-    active_servers = len([server for server in SERVERS if NETWORK.degree(server) > 0])
+    n_current_clients = len(CLIENT_LIFETIMES)
+    n_active_servers = len([server for server in SERVERS if NETWORK.degree(server) > 0])
     return Panel(
         Text(
-            f"Active Clients: {current_clients} | Active Servers: {active_servers}",
+            f"Active Clients: {n_current_clients} | Active Servers: {n_active_servers}",
             style="bold cyan",
             justify="center",
         ),
@@ -87,7 +86,7 @@ def update_server_panel() -> Panel:
         Text(
             "\n".join(
                 [
-                    f"{server} is {'active' if connections else 'idle'}"
+                    f"{server} is {'active' if connections else 'idle'} with {connections} connected client(s)"
                     for server, connections in sorted(get_server_status().items())
                 ]
             ),
@@ -99,12 +98,10 @@ def update_server_panel() -> Panel:
 
 
 def update_client_panel() -> Panel:
-    with LOCK:
-        CLIENT_LIFETIMES_copy = CLIENT_LIFETIMES.copy()
     client_text = "\n".join(
         [
             f"{client}: {lifetime}"
-            for client, lifetime in sorted(CLIENT_LIFETIMES_copy.items())
+            for client, lifetime in sorted(CLIENT_LIFETIMES.items())
         ]
     )
     return Panel(
@@ -152,8 +149,8 @@ def live_rich_console():
     with Live(layout, console=CONSOLE, screen=True, refresh_per_second=1):
         while True:
             try:
-                update_event.wait()
-                update_event.clear()
+                UPDATE_EVENT.wait()
+                UPDATE_EVENT.clear()
                 layout["header"].update(update_header())
                 layout["client_panel"].update(update_client_panel())
                 layout["server_panel"].update(update_server_panel())
@@ -164,16 +161,15 @@ def live_rich_console():
                 print(e, file=open("error.log", "a"))
 
 
-def circular_layout(network, radius=1) -> dict[str, tuple[float, float]]:
+def circular_layout(
+    network: nx.Graph, radius: float = 1
+) -> dict[str, tuple[float, float]]:
     pos = {}
-    num_servers = len(
-        [n for n in network.nodes if network.nodes[n]["type"] == "server"]
-    )
-    angle_step = 2 * np.pi / num_servers
+    servers = [n for n in network.nodes if network.nodes[n]["type"] == "server"]
+    num_servers = len(servers)
+    angle_step = 2 * np.pi / (num_servers or 1)  # avoid division by zero
 
-    for i, server in enumerate(
-        [n for n in network.nodes if network.nodes[n]["type"] == "server"]
-    ):
+    for i, server in enumerate(servers):
         angle = i * angle_step
         pos[server] = (radius * np.cos(angle), radius * np.sin(angle))
 
