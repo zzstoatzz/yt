@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 import networkx as nx
 import numpy as np
 from matplotlib import pyplot as plt
@@ -5,6 +7,7 @@ from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
 from rich.text import Text
+from servers import calculate_ewma, calculate_server_pressure
 from settings import settings
 from variables import (
     CLIENT_LIFETIMES,
@@ -67,9 +70,17 @@ def update_header() -> Panel:
         n_active_servers = len(
             [server for server in SERVERS if NETWORK.degree(server) > 0]
         )
+
         return Panel(
             Text(
-                f"Active Clients: {len(CLIENT_LIFETIMES)} | Active Servers: {n_active_servers}",
+                (
+                    f"Active Clients: {len(CLIENT_LIFETIMES)} | "
+                    f"Active Servers: {n_active_servers} | "
+                    f"Total Servers: {len(SERVERS)} | "
+                    f"Server Pressure: {100*calculate_server_pressure():.2f}% | "
+                    f"EWMA Pressure: {100*calculate_ewma(settings.emwa_alpha):.2f}%"
+                    f"\n\nLast Updated: {datetime.now(UTC).strftime('%B %d, %Y %I:%M:%S %p %Z')}"
+                ),
                 style="bold cyan",
                 justify="center",
             ),

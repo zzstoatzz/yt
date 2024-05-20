@@ -1,0 +1,4 @@
+tzinfo argument must be None or of a tzinfo subclass, not type 'str'
+tzinfo argument must be None or of a tzinfo subclass, not type 'str'
+tzinfo argument must be None or of a tzinfo subclass, not type 'str'
+tzinfo argument must be None or of a tzinfo subclass, not type 'str'
