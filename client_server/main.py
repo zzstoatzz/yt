@@ -28,8 +28,8 @@ if __name__ == "__main__":
         update_client_lifetimes()
         visualize_network(step, ax)
 
-        if settings.reset_clients and step == settings.num_steps:
-            initialize_network(settings.initial_clients, reset=True)
+        if step == settings.num_steps - 1:
+            initialize_network(settings.initial_clients, reset=settings.reset_clients)
 
     ani = animation.FuncAnimation(
         fig, animate, frames=settings.num_steps, interval=settings.refresh_interval

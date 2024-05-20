@@ -105,13 +105,16 @@ def update_client_panel() -> Panel:
         ]
     )
     return Panel(
-        Text(client_text, style="green"), title="Client Lifetimes", border_style="green"
+        Text(client_text, style="green"),
+        title="Client Lifetimes",
+        border_style="green",
+        style="green",
     )
 
 
 def update_log_panel() -> Panel:
     return Panel(
-        Text("\n".join(LOG_BUFFER), overflow="ellipsis", justify="left"),
+        Text("\n".join(LOG_BUFFER), justify="left"),
         title="Logs",
         border_style="red",
     )
