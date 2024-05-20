@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: yt
-Version: 0.1.dev4+g1e59117
+Version: 0.1.dev6+gae32197.d20240520
 Summary: a common set of utilities often used in shared projects
 Author-email: Nate Nowack <nate@prefect.io>
 License: Choose a license (e.g., MIT, BSD-3-Clause, Apache-2.0)
@@ -18,6 +18,8 @@ Description-Content-Type: text/markdown
 Requires-Dist: gh-util
 Requires-Dist: marvin
 Requires-Dist: prefect
+Requires-Dist: ipython
+Requires-Dist: redis
 Provides-Extra: dev
 Requires-Dist: ruff; extra == "dev"
 Requires-Dist: uv; extra == "dev"

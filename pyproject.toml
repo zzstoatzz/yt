@@ -4,14 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yt"
-authors = [
-    {name = "Nate Nowack", email = "nate@prefect.io"},
-]
+authors = [{ name = "Nate Nowack", email = "nate@prefect.io" }]
 description = "a common set of utilities often used in shared projects"
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["pydantic", "llm", "prefect"]
-license = {text = "Choose a license (e.g., MIT, BSD-3-Clause, Apache-2.0)"}
+license = { text = "Choose a license (e.g., MIT, BSD-3-Clause, Apache-2.0)" }
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -21,11 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-dependencies = [
-    "gh-util",
-    "marvin",
-    "prefect",
-]
+dependencies = ["gh-util", "marvin", "prefect", "ipython", "redis"]
 dynamic = ["version"]
 
 [project.optional-dependencies]

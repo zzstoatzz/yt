@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+service ChatService {
+  // protocol for chat service
+  rpc JoinChat (stream ChatMessage) returns (stream ChatMessage) {}
+}
+
+message ChatMessage {
+  // struct for chat message
+  string user = 1;
+  string message = 2;
+}

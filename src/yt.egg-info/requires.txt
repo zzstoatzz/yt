@@ -1,6 +1,8 @@
 gh-util
 marvin
 prefect
+ipython
+redis
 
 [dev]
 ruff

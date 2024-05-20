@@ -1,0 +1,47 @@
+services:
+  redis:
+    image: redis:latest
+    restart: always
+    volumes:
+      - redis_data:/data
+
+  load_balancer:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python load_balancer.py
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_HOST=redis
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./:/app
+
+  event_worker:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python event_worker.py
+    depends_on:
+      - redis
+      - load_balancer
+    env_file:
+      - .env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_HOST=redis
+    volumes:
+      - ./:/app
+    deploy:
+      mode: replicated
+      replicas: 3
+
+volumes:
+  redis_data: {}
