@@ -54,7 +54,7 @@ def remove_server():
             del CLIENT_LIFETIMES[client]
         NETWORK.remove_node(server_to_remove)
         del SERVERS[server_to_remove]
-        LOG_BUFFER.append(f"🔻 Removed server: {server_to_remove}")
+        LOG_BUFFER.append(f"🔻 Spun down server: {server_to_remove}")
     UPDATE_EVENT.set()
 
 
