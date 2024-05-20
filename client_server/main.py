@@ -34,8 +34,8 @@ def wavy_demand(step: int, amplitude: int, frequency: float, offset: int) -> int
     return int(amplitude * np.sin(2 * np.pi * frequency * step) + offset)
 
 
-AMPLITUDE = 10
-ƒ = 3 / 5
+AMPLITUDE = 12
+ƒ = 4 / 5
 ø = settings.clients_per_step
 
 if __name__ == "__main__":

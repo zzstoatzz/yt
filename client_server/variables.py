@@ -9,6 +9,7 @@ CONSOLE = Console()
 LOG_BUFFER = deque(maxlen=settings.LOG_TAIL)
 
 CLIENT_LIFETIMES = {}
+CLIENT_QUEUE = deque()
 CLIENT_POOL = deque([f"Client_{i:02d}" for i in range(settings.client_pool_size)])
 SERVERS = {
     f"Server_{chr(65 + i)}": deque(maxlen=settings.max_connections)

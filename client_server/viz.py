@@ -11,6 +11,8 @@ from servers import calculate_ewma, calculate_server_pressure
 from settings import settings
 from variables import (
     CLIENT_LIFETIMES,
+    CLIENT_POOL,
+    CLIENT_QUEUE,
     CONSOLE,
     LOAD_BALANCERS,
     LOCK,
@@ -47,19 +49,20 @@ def create_layout() -> Layout:
     layout = Layout()
     layout.split_column(
         Layout(name="header", ratio=1),
+        Layout(name="metrics", ratio=1),
         Layout(name="main", ratio=6),
         Layout(name="settings_panel", ratio=1),
     )
     layout["main"].split_row(
         Layout(name="left_panel", ratio=2),
-        Layout(name="right_panel", ratio=3),
+        Layout(name="middle_panel", ratio=3),
     )
     layout["left_panel"].split_column(
         Layout(name="client_panel", ratio=1),
         Layout(name="server_panel", ratio=1),
         Layout(name="load_balancer_panel", ratio=1),
     )
-    layout["right_panel"].split_column(
+    layout["middle_panel"].split_column(
         Layout(name="logs", ratio=1),
     )
     return layout
@@ -75,16 +78,32 @@ def update_header() -> Panel:
             Text(
                 (
                     f"Active Clients: {len(CLIENT_LIFETIMES)} | "
+                    f"Total known users: {len(CLIENT_POOL)} | "
                     f"Active Servers: {n_active_servers} | "
-                    f"Total Servers: {len(SERVERS)} | "
-                    f"Server Pressure: {100*calculate_server_pressure():.2f}% | "
-                    f"EWMA Pressure: {100*calculate_ewma(settings.emwa_alpha):.2f}%"
+                    f"Total Servers: {len(SERVERS)}"
                     f"\n\nLast Updated: {datetime.now(UTC).strftime('%B %d, %Y %I:%M:%S %p %Z')}"
                 ),
                 style="bold cyan",
                 justify="center",
             ),
             title="Network Status",
+            border_style="blue",
+        )
+
+
+def update_metrics_panel() -> Panel:
+    with LOCK:
+        return Panel(
+            Text(
+                (
+                    f"Server Pressure: {100*calculate_server_pressure():.2f}% | "
+                    f"EWMA Server Pressure: {100*calculate_ewma(settings.emwa_alpha):.2f}% | "
+                    f"Client Queue Depth: {len(CLIENT_QUEUE)}"
+                ),
+                style="bold cyan",
+                justify="center",
+            ),
+            title="Metrics",
             border_style="blue",
         )
 
@@ -168,6 +187,7 @@ def live_rich_console():
                 UPDATE_EVENT.wait()
                 UPDATE_EVENT.clear()
                 layout["header"].update(update_header())
+                layout["metrics"].update(update_metrics_panel())
                 layout["client_panel"].update(update_client_panel())
                 layout["server_panel"].update(update_server_panel())
                 layout["load_balancer_panel"].update(update_load_balancer_panel())

@@ -20,7 +20,7 @@ class DemoSettings(BaseSettings):
         0.8, description="Server pressure threshold for scaling up"
     )
     server_scale_down_threshold: float = Field(
-        0.3, description="Server pressure threshold for scaling down"
+        0.4, description="Server pressure threshold for scaling down"
     )
     max_pressure_history: int = Field(
         100, description="Number of pressure values to keep for moving average"

@@ -4,6 +4,7 @@ from settings import settings
 from variables import (
     CLIENT_LIFETIMES,
     CLIENT_POOL,
+    CLIENT_QUEUE,
     LOAD_BALANCERS,
     LOCK,
     LOG_BUFFER,
@@ -14,13 +15,14 @@ from variables import (
 
 
 def add_client(client: str):
-    if client in CLIENT_LIFETIMES:
-        raise ValueError(f"❌ {client} is already online")
-
-    load_balancer = random.choice(LOAD_BALANCERS)
     with LOCK:
+        load_balancer = random.choice(LOAD_BALANCERS)
+
         if len(CLIENT_LIFETIMES) >= len(SERVERS) * settings.max_connections:
-            LOG_BUFFER.append(f"⛔️ {client} connection refused: network is full")
+            LOG_BUFFER.append(
+                f"⛔️ {client} connection refused: network full - queueing..."
+            )
+            CLIENT_QUEUE.appendleft(client)
             return
         NETWORK.add_node(client, type="client")
         NETWORK.add_edge(client, load_balancer)
@@ -42,15 +44,21 @@ def add_client(client: str):
         server = random.choice(available_servers)
         with LOCK:
             NETWORK.add_edge(load_balancer, server, client=client)
-            LOG_BUFFER.append(f"🤝 {load_balancer} connected {client} to {server}")
+            LOG_BUFFER.append(f"... 🤝 {load_balancer} connected {client} to {server}")
             SERVERS[server].append(client)
 
     UPDATE_EVENT.set()
 
 
-def add_random_client():
-    if offline_clients := list(set(CLIENT_POOL) - set(CLIENT_LIFETIMES.keys())):
-        add_client(random.choice(offline_clients))
+def add_random_client():  # TODO: could make this more creative
+    if CLIENT_QUEUE:
+        client = CLIENT_QUEUE.popleft()
+        LOG_BUFFER.append(f"🟢 ⏱️ {client} connected from queue")
+        add_client(client)
+    else:
+        offline_clients = list(set(CLIENT_POOL) - set(CLIENT_LIFETIMES.keys()))
+        if offline_clients:
+            add_client(random.choice(offline_clients))
 
 
 def initialize_network(num_clients: int, reset=False):
@@ -102,7 +110,9 @@ def update_client_lifetimes():
                 NETWORK.remove_edge(*edge)
             if client in (server_ctxs := SERVERS[server]):
                 server_ctxs.remove(client)
-            LOG_BUFFER.append(f"💤 {load_balancer} disconnected {client} from {server}")
+            LOG_BUFFER.append(
+                f"... 💤 {load_balancer} disconnected {client} from {server}"
+            )
 
             NETWORK.remove_node(client)
             del CLIENT_LIFETIMES[client]
