@@ -40,11 +40,6 @@ def get_load_balancer_status() -> dict[str, int]:
     return status
 
 
-def get_CLIENT_LIFETIMES() -> dict[str, int]:
-    with LOCK:
-        return CLIENT_LIFETIMES.copy()
-
-
 def create_layout() -> Layout:
     layout = Layout()
     layout.split_column(
@@ -68,17 +63,19 @@ def create_layout() -> Layout:
 
 
 def update_header() -> Panel:
-    n_current_clients = len(CLIENT_LIFETIMES)
-    n_active_servers = len([server for server in SERVERS if NETWORK.degree(server) > 0])
-    return Panel(
-        Text(
-            f"Active Clients: {n_current_clients} | Active Servers: {n_active_servers}",
-            style="bold cyan",
-            justify="center",
-        ),
-        title="Network Status",
-        border_style="blue",
-    )
+    with LOCK:
+        n_active_servers = len(
+            [server for server in SERVERS if NETWORK.degree(server) > 0]
+        )
+        return Panel(
+            Text(
+                f"Active Clients: {len(CLIENT_LIFETIMES)} | Active Servers: {n_active_servers}",
+                style="bold cyan",
+                justify="center",
+            ),
+            title="Network Status",
+            border_style="blue",
+        )
 
 
 def update_server_panel() -> Panel:
@@ -149,7 +146,12 @@ def update_settings_panel() -> Panel:
 def live_rich_console():
     layout = create_layout()
 
-    with Live(layout, console=CONSOLE, screen=True, refresh_per_second=1):
+    with Live(
+        layout,
+        console=CONSOLE,
+        screen=True,
+        refresh_per_second=1000 // settings.refresh_interval,
+    ):
         while True:
             try:
                 UPDATE_EVENT.wait()
@@ -161,7 +163,7 @@ def live_rich_console():
                 layout["logs"].update(update_log_panel())
                 layout["settings_panel"].update(update_settings_panel())
             except Exception as e:
-                print(e, file=open("error.log", "a"))
+                print(e, file=open("error_log.txt", "a"))
 
 
 def circular_layout(
