@@ -5,7 +5,6 @@ from pydantic import Field
 from settings import settings
 from variables import (
     CLIENT_LIFETIMES,
-    LOCK,
     LOG_BUFFER,
     NETWORK,
     SERVER_PRESSURE_HISTORY,
@@ -17,7 +16,6 @@ ServerPressure = Annotated[float, Field(ge=0, le=1)]
 
 
 def calculate_server_pressure() -> ServerPressure:
-    """must be called within a lock context"""
     max_connections = len(SERVERS) * settings.max_connections
     return (
         sum(len(SERVERS[server]) for server in SERVERS) / max_connections
@@ -42,7 +40,7 @@ def add_server():
     new_server_id = f"Server_{chr(65 + len(SERVERS))}"
     SERVERS[new_server_id] = deque(maxlen=settings.max_connections)
     NETWORK.add_node(new_server_id, type="server")
-    LOG_BUFFER.append(f"🔺 Added new server: {new_server_id}")
+    LOG_BUFFER.append(f"🔺 Spun up server: {new_server_id}")
     UPDATE_EVENT.set()
 
 
@@ -59,12 +57,11 @@ def remove_server():
 
 
 def manage_servers():
-    with LOCK:
-        pressure = calculate_server_pressure()
-        SERVER_PRESSURE_HISTORY.append(pressure)
-        moving_average_pressure = calculate_ewma(settings.emwa_alpha)
+    pressure = calculate_server_pressure()
+    SERVER_PRESSURE_HISTORY.append(pressure)
+    moving_average_pressure = calculate_ewma(settings.emwa_alpha)
 
-        if moving_average_pressure > settings.server_scale_up_threshold:
-            add_server()
-        elif moving_average_pressure < settings.server_scale_down_threshold:
-            remove_server()
+    if moving_average_pressure > settings.server_scale_up_threshold:
+        add_server()
+    elif moving_average_pressure < settings.server_scale_down_threshold:
+        remove_server()

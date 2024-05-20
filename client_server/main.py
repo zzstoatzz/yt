@@ -15,26 +15,7 @@ from viz import (
     visualize_network,
 )
 
-
-def wavy_demand(step: int, amplitude: int, frequency: float, offset: int) -> int:
-    """
-    Calculate the number of clients to add based on a sinusoidal function.
-
-    only used if settings.SINUSOIDAL is True (e.g. export DEMO_SINUSOIDAL=1)
-
-    Args:
-        step: The current step in the simulation.
-        amplitude: The maximum number of clients to add (peak of the wave).
-        frequency: The frequency of the sine wave.
-        offset: The offset to shift the entire wave vertically.
-
-    Returns:
-        int: The number of clients to add at the current step.
-    """
-    return int(amplitude * np.sin(2 * np.pi * frequency * step) + offset)
-
-
-AMPLITUDE = 12
+A = 12
 ƒ = 4 / 5
 ø = settings.clients_per_step
 
@@ -48,9 +29,9 @@ if __name__ == "__main__":
             initialize_network(settings.initial_clients)
         else:
             for _ in range(
-                settings.clients_per_step
+                ø
                 if not settings.SINUSOIDAL
-                else wavy_demand(step, AMPLITUDE, ƒ, ø)
+                else int(A * np.sin(2 * np.pi * ƒ * step) + ø)
             ):
                 add_random_client()
 

@@ -50,8 +50,8 @@ def create_layout() -> Layout:
     layout.split_column(
         Layout(name="header", ratio=1),
         Layout(name="metrics", ratio=1),
-        Layout(name="main", ratio=6),
-        Layout(name="settings_panel", ratio=1),
+        Layout(name="main", ratio=7),
+        Layout(name="settings_panel", ratio=2),
     )
     layout["main"].split_row(
         Layout(name="left_panel", ratio=2),
@@ -80,8 +80,8 @@ def update_header() -> Panel:
                     f"Active Clients: {len(CLIENT_LIFETIMES)} | "
                     f"Total known users: {len(CLIENT_POOL)} | "
                     f"Active Servers: {n_active_servers} | "
-                    f"Total Servers: {len(SERVERS)}"
-                    f"\n\nLast Updated: {datetime.now(UTC).strftime('%B %d, %Y %I:%M:%S %p %Z')}"
+                    f"Total Servers: {len(SERVERS)} | "
+                    f"Last Updated: {datetime.now(UTC).strftime('%B %d, %Y %I:%M:%S %p %Z')}"
                 ),
                 style="bold cyan",
                 justify="center",
