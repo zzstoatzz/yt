@@ -1,0 +1,6 @@
+matplotlib
+networkx
+numpy
+pydantic
+pydantic-settings
+rich
