@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: yt
-Version: 0.1.dev16+g10ecb7e
+Version: 0.1.dev18+g253cdaf.d20240617
 Summary: a common set of utilities often used in shared projects
 Author-email: Nate Nowack <nate@prefect.io>
 License: Choose a license (e.g., MIT, BSD-3-Clause, Apache-2.0)

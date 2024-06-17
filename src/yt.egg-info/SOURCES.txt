@@ -1,5 +1,10 @@
 .gitignore
 .pre-commit-config.yaml
+aquietnightcoding.png
+aquietnightcoding.webp
+error_log.txt
+logo.svg
+out.svg
 pyproject.toml
 annotated_types/demo.py
 annotated_types/reask.py
@@ -7,6 +12,7 @@ annotated_types/requirements.txt
 client_server/README.md
 client_server/main.py
 client_server/network.py
+client_server/requirements.txt
 client_server/servers.py
 client_server/settings.py
 client_server/variables.py
@@ -14,6 +20,9 @@ client_server/viz.py
 client_server/img/ani.gif
 client_server/img/dashboard.png
 client_server/img/network.png
+iit/components.py
+iit/config.py
+iit/main.py
 journalist_cliques/Dockerfile
 journalist_cliques/docker-compose.yml
 journalist_cliques/event.py

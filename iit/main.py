@@ -1,14 +1,11 @@
 import asyncio
 import logging
-from typing import TypeVar
 
 import anyio
-from components import RedisAggregator, RedisSubsystem
+from components import RedisAggregator, RedisSubsystem, T
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("🧱")
-
-T = TypeVar("T", bound=int | float | str)
 
 
 async def subsystem_task(subsystem: RedisSubsystem[T], value: T):
@@ -27,7 +24,7 @@ async def main():
         handler=lambda x: x.get("value", x),
     )
     aggregator = RedisAggregator[float](
-        merge_fn=lambda values: sum(values) / len(values)
+        merge_fn=lambda values: sum(values) / (len(values) or 0),
     )
 
     async with anyio.create_task_group() as tg:
