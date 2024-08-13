@@ -2,9 +2,7 @@
 .pre-commit-config.yaml
 aquietnightcoding.png
 aquietnightcoding.webp
-error_log.txt
 logo.svg
-out.svg
 pyproject.toml
 annotated_types/demo.py
 annotated_types/reask.py
