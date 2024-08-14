@@ -1,7 +1,4 @@
-from datetime import timedelta
-
 from prefect import flow, task
-from prefect.client.schemas.schedules import IntervalSchedule
 
 
 @task(retries=3)
@@ -33,7 +30,7 @@ def main(query: str = "query"):
 
 
 if __name__ == "__main__":
-    main.serve(
-        name="My First Deployment",
-        schedules=[IntervalSchedule(interval=timedelta(minutes=1))],
-    )
+    main.from_source(
+        source="https://github.com/zzstoatzz/yt.git",
+        entrypoint="new-prefect-project/main.py:main",
+    ).deploy(name="My First Deployment", work_pool_name="docker-work")
