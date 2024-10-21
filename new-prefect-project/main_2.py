@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 import httpx
 from prefect import Task, flow, task
 from prefect.artifacts import create_table_artifact
@@ -19,17 +17,17 @@ def is_rate_limit_error(task: Task, task_run: TaskRun, state: State) -> bool:
     retry_delay_seconds=30,
     retry_condition_fn=is_rate_limit_error,
 )
-def get_astronauts() -> list[str]:
+def get_current_astronauts() -> list[dict]:
     """Get the current astronauts in space."""
     with httpx.Client() as client:
         response = client.get("http://api.open-notify.org/astros.json")
         response.raise_for_status()
-        return [person["name"] for person in response.json()["people"]]
+        return response.json()["people"]
 
 
-@task(cache_policy=INPUTS, cache_expiration=timedelta(hours=1))
-def get_astronaut_info(name: str) -> dict:
-    """Get information about an astronaut from Wikipedia."""
+@task(cache_policy=INPUTS)
+def enrich_astronaut_data(astronaut: dict) -> dict:
+    """Enrich astronaut data with information from Wikipedia."""
     with httpx.Client() as client:
         response = client.get(
             "https://en.wikipedia.org/w/api.php",
@@ -39,21 +37,17 @@ def get_astronaut_info(name: str) -> dict:
                 "prop": "extracts",
                 "exintro": True,
                 "explaintext": True,
-                "titles": name,
+                "titles": astronaut["name"],
             },
         )
         response.raise_for_status()
         page = next(iter(response.json()["query"]["pages"].values()))
-        return {"name": name, "extract": page.get("extract", "No information found.")}
-
-
-@task
-def process_astronaut(info: list[dict]) -> list[dict]:
-    """Process the astronaut information."""
-    return {
-        "name": info["name"],
-        "first_sentence": info["extract"].split(".")[0] if info["extract"] else "",
-    }
+        extract = page.get("extract", "No information found.")
+        return {
+            "name": astronaut["name"],
+            "craft": astronaut["craft"],
+            "bio": extract.split(".")[0] if extract else "",
+        }
 
 
 @task
@@ -68,10 +62,9 @@ def save_astronaut_data(data: list[dict]) -> None:
 
 @flow
 def track_astronauts():
-    astronauts = get_astronauts()
-    astronaut_info = get_astronaut_info.map(astronauts)
-    processed_info = process_astronaut.map(astronaut_info)
-    save_astronaut_data(processed_info)
+    astronauts = get_current_astronauts()
+    enriched_data = enrich_astronaut_data.map(astronauts)
+    save_astronaut_data(enriched_data)
 
 
 if __name__ == "__main__":
