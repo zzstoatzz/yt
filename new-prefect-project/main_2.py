@@ -13,8 +13,8 @@ def is_rate_limit_error(task: Task, task_run: TaskRun, state: State) -> bool:
 
 
 @task(
-    retries=42,
-    retry_delay_seconds=30,
+    retries=3,
+    retry_delay_seconds=[3, 4, 30],
     retry_condition_fn=is_rate_limit_error,
 )
 def get_current_astronauts() -> list[dict]:
