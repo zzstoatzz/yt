@@ -10,6 +10,9 @@ def is_rate_limit_error(task: Task, task_run: TaskRun, state: State) -> bool:
         state.result()
     except httpx.HTTPStatusError as e:
         return e.response.status_code == 429
+    except Exception as e:
+        print(f"run {task_run.name!r} of task {task.name!r} failed with error {e!r}")
+        return False
 
 
 @task(
