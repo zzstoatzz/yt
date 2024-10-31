@@ -11,7 +11,7 @@ RUN apt-get update && \
 ENV UV_SYSTEM_PYTHON=1
 ENV PATH="/root/.local/bin:$PATH"
 
-COPY requirements.txt .
+COPY demos/3.1.0/requirements.txt .
 
 RUN uv pip install -r requirements.txt
 
