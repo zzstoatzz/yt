@@ -6,3 +6,6 @@ persist_by_default = true
 
 [tasks]
 runner.thread_pool_max_workers = 50
+
+[logging]
+level = "INFO"
