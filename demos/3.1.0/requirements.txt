@@ -1,4 +1,4 @@
-git+https://github.com/PrefectHQ/prefect.git
+prefect>=3.1.0
 prefect-aws
 pandas
 numpy
