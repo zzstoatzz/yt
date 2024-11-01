@@ -8,4 +8,4 @@ persist_by_default = true
 runner.thread_pool_max_workers = 50
 
 [logging]
-level = "DEBUG"
+level = "INFO"

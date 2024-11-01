@@ -1,6 +1,6 @@
 # /// script
 # dependencies = [
-#     "prefect@git+https://github.com/PrefectHQ/prefect.git",
+#     "prefect>=3.1.0",
 #     "prefect-aws",
 #     "pandas",
 #     "numpy",
@@ -85,6 +85,8 @@ if __name__ == "__main__":
             build=True,
             push=False,
         )
+    elif len(sys.argv) > 1 and sys.argv[1] == "serve":
+        analyze_dataset.serve(name="data-analysis-demo-serve")
     else:
         # Otherwise just run the flow
         analyze_dataset()
