@@ -22,7 +22,7 @@ from prefect.runner.storage import GitRepository
 CACHE_POLICY = (INPUTS + TASK_SOURCE).configure(key_storage="big-dataset-cache-keys")
 
 
-@task(cache_policy=CACHE_POLICY)
+@task(cache_policy=CACHE_POLICY, refresh_cache=True)
 def load_big_dataset(total_rows: int, num_groups: int) -> list[pd.DataFrame]:
     df = pd.DataFrame(
         {
