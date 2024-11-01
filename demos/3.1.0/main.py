@@ -72,8 +72,8 @@ if __name__ == "__main__":
             dockerfile=str(Path(__file__).parent / "Dockerfile"),
         )
         repo = GitRepository(
-            url="https://github.com/PrefectHQ/prefect.git",
-            branch="demos",
+            url="https://github.com/zzstoatzz/yt.git",
+            branch="main",
         )
         analyze_dataset.from_source(
             source=repo,
